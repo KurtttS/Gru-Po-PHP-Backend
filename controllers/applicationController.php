@@ -90,5 +90,125 @@ class ApplicationController {
             ]);
         }
     }
+
+        
+    // FETCH RESUME
+    public function toGetResume() {
+
+        header("Content-Type: application/json");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $userId = $data['user_id'] ?? null;
+
+        if (!$userId) {
+            echo json_encode([
+                "status" => "error",
+                "message" => "User ID is required."
+            ]);
+            return;
+        }
+
+        $resume = $this->model->getResume($userId);
+
+        if ($resume) {
+
+            echo json_encode([
+                "status" => "success",
+                "message" => "Resume retrieved successfully.",
+                "resume" => [
+                    "pwd_user_id" => $resume['pwd_user_id'],
+                    "name" => $resume['name'],
+                    "email" => $resume['email'],
+                    "phone" => $resume['phone'],
+                    "address" => $resume['address'],
+                    "education" => $resume['education'] ?? "",
+                    "experience" => $resume['experience'] ?? "",
+                    "skills" => $resume['skills'] ?? "",
+                    "certifications" => $resume['certifications'] ?? ""
+                ]
+            ]);
+
+        } else {
+
+            echo json_encode([
+                "status" => "error",
+                "message" => "PWD user profile not found."
+            ]);
+        }
+    }
+
+    
+    public function toSaveResume() {
+
+        header("Content-Type: application/json; charset=UTF-8");
+
+        try {
+
+            // Read JSON sent by Android
+            $data = json_decode(file_get_contents("php://input"), true);
+
+            if (!is_array($data)) {
+                http_response_code(400);
+
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Invalid JSON request."
+                ]);
+                return;
+            }
+
+            // Get submitted values
+            $userId = $data['user_id'] ?? null;
+            $education = $data['education'] ?? "";
+            $experience = $data['experience'] ?? "";
+            $skills = $data['skills'] ?? "";
+            $certifications = $data['certifications'] ?? "";
+
+            // Validate user ID
+            if (empty($userId) || !is_numeric($userId)) {
+                http_response_code(400);
+
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Valid User ID is required."
+                ]);
+                return;
+            }
+
+            // Save through ApplicationModel
+            $result = $this->model->saveResume(
+                (int)$userId,
+                $education,
+                $experience,
+                $skills,
+                $certifications
+            );
+
+            if ($result) {
+                echo json_encode([
+                    "success" => true,
+                    "message" => "Resume saved successfully."
+                ]);
+            } else {
+                http_response_code(400);
+
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Failed to save resume. PWD profile may not exist."
+                ]);
+            }
+
+        } catch (Throwable $e) {
+            error_log("SAVE RESUME ERROR: " . $e->getMessage());
+
+            echo json_encode([
+                "success" => false,
+                "message" => "An error occurred while saving the resume."
+    ]);
+}
+    }
+
+
 }
 ?>
