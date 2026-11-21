@@ -153,7 +153,7 @@ switch ($action) {
         $companyJobController->toUpdateJob();
         break;
 
-        case 'pwd_profile':
+    case 'pwd_profile':
         require_once 'model/pwdProfileModel.php';
         require_once 'controllers/pwdProfileController.php';
 
@@ -171,49 +171,33 @@ switch ($action) {
         $pwdProfileController->toUpdatePwdProfile();
         break;
 
-    case 'create_resume':
-        require_once 'model/resumeModel.php';
-        require_once 'controllers/resumeController.php';
+    case 'getJobDetails':
+        require_once 'model/applicationModel.php';
+        require_once 'controllers/applicationController.php';
 
-        $resumeModel = new ResumeModel($conn);
-        $resumeController = new ResumeController($resumeModel);
-        $resumeController->toCreateResume();
+        $applicationModel = new ApplicationModel($conn);
+        $applicationController = new ApplicationController($applicationModel);
+        $applicationController->toGetJobDetails();
         break;
 
-    case 'fetch_resumes':
-        require_once 'model/resumeModel.php';
-        require_once 'controllers/resumeController.php';
-
-        $resumeModel = new ResumeModel($conn);
-        $resumeController = new ResumeController($resumeModel);
-        $resumeController->toFetchResumes();
-        break;
-
+    
     case 'fetch_resume':
-        require_once 'model/resumeModel.php';
-        require_once 'controllers/resumeController.php';
+        require_once 'model/applicationModel.php';
+        require_once 'controllers/applicationController.php';
 
-        $resumeModel = new ResumeModel($conn);
-        $resumeController = new ResumeController($resumeModel);
-        $resumeController->toFetchResume();
+        $applicationModel = new ApplicationModel($conn);
+        $applicationController = new ApplicationController($applicationModel);
+        $applicationController->toGetResume();
         break;
 
-    case 'update_resume':
-        require_once 'model/resumeModel.php';
-        require_once 'controllers/resumeController.php';
 
-        $resumeModel = new ResumeModel($conn);
-        $resumeController = new ResumeController($resumeModel);
-        $resumeController->toUpdateResume();
-        break;
+    case 'save_resume':
+        require_once 'model/applicationModel.php';
+        require_once 'controllers/applicationController.php';
 
-    case 'delete_resume':
-        require_once 'model/resumeModel.php';
-        require_once 'controllers/resumeController.php';
-
-        $resumeModel = new ResumeModel($conn);
-        $resumeController = new ResumeController($resumeModel);
-        $resumeController->toDeleteResume();
+        $applicationModel = new ApplicationModel($conn);
+        $applicationController = new ApplicationController($applicationModel);
+        $applicationController->toSaveResume();
         break;
 
 
@@ -222,7 +206,7 @@ switch ($action) {
         http_response_code(404);
         echo json_encode([
             "status" => "error",
-            "message" => "Invalid API endpoint or action."
+            "message" => "Invalid endpoint or action."
         ]);
         break;
 }
