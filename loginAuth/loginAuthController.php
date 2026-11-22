@@ -1,6 +1,5 @@
 
 <?php
-require_once __DIR__ . '/../config/authToken.php';
 
 class LoginAuthController {
 
@@ -55,12 +54,9 @@ class LoginAuthController {
             $user = $this->loginModel->login($email, $password);
 
             if ($user) {
-                $accessToken = AuthToken::issue((int)$user['id'], $user['role']);
-
                 echo json_encode([
                     "status" => "success",
                     "message" => "Login successful!",
-                    "access_token" => $accessToken,
                     "user" => $user
                 ]);
 
@@ -83,20 +79,6 @@ class LoginAuthController {
             echo json_encode([
                 "status" => "error",
                 "message" => "Database error."
-            ]);
-        } catch (RuntimeException $e) {
-            http_response_code(500);
-            error_log("Login token error: " . $e->getMessage());
-            echo json_encode([
-                "status" => "error",
-                "message" => "Unable to create an authentication token."
-            ]);
-        } catch (InvalidArgumentException $e) {
-            http_response_code(500);
-            error_log("Login token error: " . $e->getMessage());
-            echo json_encode([
-                "status" => "error",
-                "message" => "Unable to create an authentication token."
             ]);
         }
     }

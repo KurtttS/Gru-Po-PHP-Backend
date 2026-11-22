@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../config/authToken.php';
 
 class ApplyController {
 
@@ -36,40 +35,6 @@ class ApplyController {
         return ($value !== false && $value > 0) ? (int)$value : null;
     }
 
-    private function authenticatedUser(string $requiredRole): ?array {
-        try {
-            $user = AuthToken::authenticate();
-        } catch (RuntimeException $e) {
-            error_log("Apply authentication configuration error: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                "success" => false,
-                "message" => "Authentication is not configured."
-            ]);
-            return null;
-        }
-
-        if ($user === null) {
-            http_response_code(401);
-            echo json_encode([
-                "success" => false,
-                "message" => "A valid bearer token is required."
-            ]);
-            return null;
-        }
-
-        if ($user['role'] !== $requiredRole) {
-            http_response_code(403);
-            echo json_encode([
-                "success" => false,
-                "message" => "You are not allowed to perform this action."
-            ]);
-            return null;
-        }
-
-        return $user;
-    }
-
     public function toCreateApplication() {
         header("Access-Control-Allow-Origin: *");
         header("Content-Type: application/json; charset=UTF-8");
@@ -81,13 +46,9 @@ class ApplyController {
             return;
         }
 
-        $user = $this->authenticatedUser('pwd');
-        if ($user === null) {
-            return;
-        }
-
         $data = $this->requestData();
         $jobId = $this->positiveInt($data['job_id'] ?? null);
+        $userId = $this->positiveInt($data['user_id'] ?? null);
         $resumeId = null;
         $hasResumeId = isset($data['resume_id']) &&
             $data['resume_id'] !== '' &&
@@ -97,17 +58,17 @@ class ApplyController {
             $resumeId = $this->positiveInt($data['resume_id']);
         }
 
-        if (!$jobId || ($hasResumeId && !$resumeId)) {
+        if (!$jobId || !$userId || ($hasResumeId && !$resumeId)) {
             http_response_code(400);
             echo json_encode([
                 "success" => false,
-                "message" => "A valid job_id and optional resume_id are required."
+                "message" => "Valid job_id and user_id are required."
             ]);
             return;
         }
 
         try {
-            $result = $this->model->createApplication($jobId, $user['user_id'], $resumeId);
+            $result = $this->model->createApplication($jobId, $userId, $resumeId);
 
             if (!$result['ok']) {
                 $messages = [
@@ -159,25 +120,21 @@ class ApplyController {
             return;
         }
 
-        $user = $this->authenticatedUser('pwd');
-        if ($user === null) {
-            return;
-        }
-
         $data = $this->requestData();
         $jobId = $this->positiveInt($data['job_id'] ?? $_GET['job_id'] ?? null);
+        $userId = $this->positiveInt($data['user_id'] ?? $_GET['user_id'] ?? null);
 
-        if (!$jobId) {
+        if (!$jobId || !$userId) {
             http_response_code(400);
             echo json_encode([
                 "success" => false,
-                "message" => "A valid job_id is required."
+                "message" => "Valid job_id and user_id are required."
             ]);
             return;
         }
 
         try {
-            $statusInfo = $this->model->checkApplicationStatus($jobId, $user['user_id']);
+            $statusInfo = $this->model->checkApplicationStatus($jobId, $userId);
             http_response_code(200);
             echo json_encode(array_merge(["success" => true], $statusInfo));
         } catch (PDOException $e) {
@@ -201,13 +158,24 @@ class ApplyController {
             return;
         }
 
-        $user = $this->authenticatedUser('company');
-        if ($user === null) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = $this->requestData();
+            $userId = $this->positiveInt($data['user_id'] ?? null);
+        } else {
+            $userId = $this->positiveInt($_GET['user_id'] ?? null);
+        }
+
+        if (!$userId) {
+            http_response_code(400);
+            echo json_encode([
+                "success" => false,
+                "message" => "Valid user_id is required."
+            ]);
             return;
         }
 
         try {
-            $applicants = $this->model->getApplicantsByCompanyUser($user['user_id']);
+            $applicants = $this->model->getApplicantsByCompanyUser($userId);
             http_response_code(200);
             echo json_encode([
                 "success" => true,
@@ -234,12 +202,8 @@ class ApplyController {
             return;
         }
 
-        $user = $this->authenticatedUser('pwd');
-        if ($user === null) {
-            return;
-        }
-
         $data = $this->requestData();
+        $userId = $this->positiveInt($data['user_id'] ?? null);
         $applicationId = null;
         $jobId = null;
         $hasApplicationId = isset($data['application_id']) &&
@@ -257,20 +221,21 @@ class ApplyController {
             $jobId = $this->positiveInt($data['job_id']);
         }
 
-        if ((!$applicationId && !$jobId) ||
+        if (!$userId ||
+            (!$applicationId && !$jobId) ||
             ($hasApplicationId && !$applicationId) ||
             ($hasJobId && !$jobId)) {
             http_response_code(400);
             echo json_encode([
                 "success" => false,
-                "message" => "A valid application_id or job_id is required."
+                "message" => "Valid user_id and application_id or job_id are required."
             ]);
             return;
         }
 
         try {
             $result = $this->model->deleteApplication(
-                $user['user_id'],
+                $userId,
                 $applicationId,
                 $jobId
             );
