@@ -229,7 +229,6 @@ switch ($action) {
         $applyController->toFetchApplicants();
         break;
 
-    case 'delete_application':
     case 'cancel_application':
         require_once 'model/applyModel.php';
         require_once 'controllers/applyController.php';
