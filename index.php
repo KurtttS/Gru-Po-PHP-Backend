@@ -238,7 +238,43 @@ switch ($action) {
         $applyController = new ApplyController($applyModel);
         $applyController->toDeleteApplication();
         break;
+    
+    case 'fetch_company_applicants':
+        require_once 'model/applicantScreeningModel.php';
+        require_once 'controllers/applicantScreeningController.php';
 
+        $applicantScreeningModel = new ApplicantScreeningModel($conn);
+        $applicantScreeningController = new ApplicantScreeningController($applicantScreeningModel);
+
+        $applicantScreeningController->fetchCompanyApplicants();
+
+        break;
+    
+    case 'fetch_applicant_screening_details':
+        require_once 'model/applicantScreeningModel.php';
+        require_once 'controllers/applicantScreeningController.php';
+
+        $applicantScreeningModel = new ApplicantScreeningModel($conn);
+
+        $applicantScreeningController = new ApplicantScreeningController(
+            $applicantScreeningModel
+        );
+
+        $applicantScreeningController->fetchApplicantScreeningDetails();
+        break;
+
+    case 'update_application_status':
+        require_once 'model/applicantScreeningModel.php';
+        require_once 'controllers/applicantScreeningController.php';
+
+        $applicantScreeningModel = new ApplicantScreeningModel($conn);
+
+        $applicantScreeningController = new ApplicantScreeningController(
+            $applicantScreeningModel
+        );
+
+        $applicantScreeningController->updateApplicationStatus();
+        break;
 
     default:
         // Endpoint not found

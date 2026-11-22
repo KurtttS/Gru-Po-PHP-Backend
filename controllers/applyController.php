@@ -147,23 +147,22 @@ class ApplyController {
         }
     }
 
-    public function toFetchApplicants() {
+    public function toFetchUserApplications() {
         header("Access-Control-Allow-Origin: *");
         header("Content-Type: application/json; charset=UTF-8");
         header("Access-Control-Allow-Methods: POST, GET");
 
         if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'GET'], true)) {
             http_response_code(405);
-            echo json_encode(["success" => false, "message" => "Only GET or POST requests are allowed."]);
+            echo json_encode([
+                "success" => false,
+                "message" => "Only GET or POST requests are allowed."
+            ]);
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = $this->requestData();
-            $userId = $this->positiveInt($data['user_id'] ?? null);
-        } else {
-            $userId = $this->positiveInt($_GET['user_id'] ?? null);
-        }
+        $data = $this->requestData();
+        $userId = $this->positiveInt($data['user_id'] ?? null);
 
         if (!$userId) {
             http_response_code(400);
@@ -175,66 +174,23 @@ class ApplyController {
         }
 
         try {
-            $applicants = $this->model->getApplicantsByCompanyUser($userId);
+            $applications = $this->model->getUserApplications($userId);
+
             http_response_code(200);
             echo json_encode([
                 "success" => true,
-                "applicants" => $applicants
+                "applications" => $applications
             ]);
+
         } catch (PDOException $e) {
-            error_log("Fetch applicants error: " . $e->getMessage());
+            error_log("Fetch user applications error: " . $e->getMessage());
+
             http_response_code(500);
             echo json_encode([
                 "success" => false,
-                "message" => "Database error while fetching applicants."
+                "message" => "Database error while fetching applications."
             ]);
         }
-    }
-
-    public function toFetchUserApplications() {
-    header("Access-Control-Allow-Origin: *");
-    header("Content-Type: application/json; charset=UTF-8");
-    header("Access-Control-Allow-Methods: POST, GET");
-
-    if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'GET'], true)) {
-        http_response_code(405);
-        echo json_encode([
-            "success" => false,
-            "message" => "Only GET or POST requests are allowed."
-        ]);
-        return;
-    }
-
-    $data = $this->requestData();
-    $userId = $this->positiveInt($data['user_id'] ?? null);
-
-    if (!$userId) {
-        http_response_code(400);
-        echo json_encode([
-            "success" => false,
-            "message" => "Valid user_id is required."
-        ]);
-        return;
-    }
-
-    try {
-        $applications = $this->model->getUserApplications($userId);
-
-        http_response_code(200);
-        echo json_encode([
-            "success" => true,
-            "applications" => $applications
-        ]);
-
-    } catch (PDOException $e) {
-        error_log("Fetch user applications error: " . $e->getMessage());
-
-        http_response_code(500);
-        echo json_encode([
-            "success" => false,
-            "message" => "Database error while fetching applications."
-        ]);
-    }
 }
 
     public function toDeleteApplication() {
