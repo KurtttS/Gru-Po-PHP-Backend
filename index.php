@@ -200,6 +200,45 @@ switch ($action) {
         $applicationController->toSaveResume();
         break;
 
+    case 'apply':
+    case 'apply_job':
+    case 'create_application':
+        require_once 'model/applyModel.php';
+        require_once 'controllers/applyController.php';
+
+        $applyModel = new ApplyModel($conn);
+        $applyController = new ApplyController($applyModel);
+        $applyController->toCreateApplication();
+        break;
+
+    case 'check_application':
+        require_once 'model/applyModel.php';
+        require_once 'controllers/applyController.php';
+
+        $applyModel = new ApplyModel($conn);
+        $applyController = new ApplyController($applyModel);
+        $applyController->toCheckApplicationStatus();
+        break;
+
+    case 'fetch_applicants':
+        require_once 'model/applyModel.php';
+        require_once 'controllers/applyController.php';
+
+        $applyModel = new ApplyModel($conn);
+        $applyController = new ApplyController($applyModel);
+        $applyController->toFetchApplicants();
+        break;
+
+    case 'delete_application':
+    case 'cancel_application':
+        require_once 'model/applyModel.php';
+        require_once 'controllers/applyController.php';
+
+        $applyModel = new ApplyModel($conn);
+        $applyController = new ApplyController($applyModel);
+        $applyController->toDeleteApplication();
+        break;
+
 
     default:
         // Endpoint not found
