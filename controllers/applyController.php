@@ -10,8 +10,25 @@ class ApplyController {
     }
 
     private function requestData(): array {
-        $data = json_decode(file_get_contents("php://input"), true);
-        return is_array($data) ? $data : [];
+        $data = [];
+        $input = file_get_contents("php://input");
+
+        if (is_string($input) && trim($input) !== '') {
+            $json = json_decode($input, true);
+            if (is_array($json)) {
+                $data = $json;
+            }
+        }
+
+        if (!empty($_GET) && is_array($_GET)) {
+            $data = array_merge($data, $_GET);
+        }
+
+        if (!empty($_POST) && is_array($_POST)) {
+            $data = array_merge($data, $_POST);
+        }
+
+        return $data;
     }
 
     private function positiveInt($value): ?int {
@@ -71,11 +88,16 @@ class ApplyController {
 
         $data = $this->requestData();
         $jobId = $this->positiveInt($data['job_id'] ?? null);
-        $resumeId = isset($data['resume_id'])
-            ? $this->positiveInt($data['resume_id'])
-            : null;
+        $resumeId = null;
+        $hasResumeId = isset($data['resume_id']) &&
+            $data['resume_id'] !== '' &&
+            $data['resume_id'] !== null;
 
-        if (!$jobId || (isset($data['resume_id']) && !$resumeId)) {
+        if ($hasResumeId) {
+            $resumeId = $this->positiveInt($data['resume_id']);
+        }
+
+        if (!$jobId || ($hasResumeId && !$resumeId)) {
             http_response_code(400);
             echo json_encode([
                 "success" => false,
@@ -218,16 +240,26 @@ class ApplyController {
         }
 
         $data = $this->requestData();
-        $applicationId = isset($data['application_id'])
-            ? $this->positiveInt($data['application_id'])
-            : null;
-        $jobId = isset($data['job_id'])
-            ? $this->positiveInt($data['job_id'])
-            : null;
+        $applicationId = null;
+        $jobId = null;
+        $hasApplicationId = isset($data['application_id']) &&
+            $data['application_id'] !== '' &&
+            $data['application_id'] !== null;
+        $hasJobId = isset($data['job_id']) &&
+            $data['job_id'] !== '' &&
+            $data['job_id'] !== null;
+
+        if ($hasApplicationId) {
+            $applicationId = $this->positiveInt($data['application_id']);
+        }
+
+        if ($hasJobId) {
+            $jobId = $this->positiveInt($data['job_id']);
+        }
 
         if ((!$applicationId && !$jobId) ||
-            (isset($data['application_id']) && !$applicationId) ||
-            (isset($data['job_id']) && !$jobId)) {
+            ($hasApplicationId && !$applicationId) ||
+            ($hasJobId && !$jobId)) {
             http_response_code(400);
             echo json_encode([
                 "success" => false,

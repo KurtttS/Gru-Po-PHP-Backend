@@ -28,6 +28,24 @@ class ApplyModel {
             return ['ok' => false, 'reason' => 'pwd_profile_not_found'];
         }
 
+        $existing = $this->pdo->prepare(
+            "SELECT id FROM applications
+             WHERE job_id = :job_id AND pwd_user_id = :user_id
+             LIMIT 1"
+        );
+        $existing->execute([
+            'job_id' => $jobId,
+            'user_id' => $userId
+        ]);
+        $existingApplication = $existing->fetchColumn();
+        if ($existingApplication !== false) {
+            return [
+                'ok' => false,
+                'reason' => 'already_applied',
+                'application_id' => (int)$existingApplication
+            ];
+        }
+
         if ($resumeId !== null) {
             $resume = $this->pdo->prepare(
                 "SELECT id FROM resumes
@@ -49,30 +67,16 @@ class ApplyModel {
 
         $resolvedResumeId = $resume->fetchColumn();
         if ($resolvedResumeId === false) {
+            if ($resumeId !== null) {
+                return ['ok' => false, 'reason' => 'resume_not_found'];
+            }
+
             $createResume = $this->pdo->prepare(
                 "INSERT INTO resumes (pwd_user_id, title, skills, experience, education, certifications)
                  VALUES (:pwd_user_id, 'Default Resume', 'Not specified', 'Not specified', 'Not specified', 'Not specified')"
             );
             $createResume->execute(['pwd_user_id' => $pwdUserId]);
             $resolvedResumeId = (int)$this->pdo->lastInsertId();
-        }
-
-        $existing = $this->pdo->prepare(
-            "SELECT id FROM applications
-             WHERE job_id = :job_id AND pwd_user_id = :user_id
-             LIMIT 1"
-        );
-        $existing->execute([
-            'job_id' => $jobId,
-            'user_id' => $userId
-        ]);
-        $existingApplication = $existing->fetchColumn();
-        if ($existingApplication !== false) {
-            return [
-                'ok' => false,
-                'reason' => 'already_applied',
-                'application_id' => (int)$existingApplication
-            ];
         }
 
         $insert = $this->pdo->prepare(
