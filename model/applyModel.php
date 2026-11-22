@@ -49,7 +49,12 @@ class ApplyModel {
 
         $resolvedResumeId = $resume->fetchColumn();
         if ($resolvedResumeId === false) {
-            return ['ok' => false, 'reason' => 'resume_not_found'];
+            $createResume = $this->pdo->prepare(
+                "INSERT INTO resumes (pwd_user_id, title, skills, experience, education, certifications)
+                 VALUES (:pwd_user_id, 'Default Resume', 'Not specified', 'Not specified', 'Not specified', 'Not specified')"
+            );
+            $createResume->execute(['pwd_user_id' => $pwdUserId]);
+            $resolvedResumeId = (int)$this->pdo->lastInsertId();
         }
 
         $existing = $this->pdo->prepare(
@@ -126,6 +131,29 @@ class ApplyModel {
             'status' => $application ? $application['status'] : null,
             'applied_at' => $application ? $application['applied_at'] : null
         ];
+    }
+
+    public function getUserApplications(int $userId): array {
+        $sql = "SELECT
+                    a.id AS application_id,
+                    a.job_id,
+                    a.status AS application_status,
+                    a.applied_at,
+                    j.title AS job_title,
+                    j.category,
+                    j.location,
+                    j.employment_type AS job_type,
+                    j.salary,
+                    c.company_name
+                FROM applications a
+                INNER JOIN job_listings j ON j.id = a.job_id
+                INNER JOIN companies c ON c.id = j.company_id
+                WHERE a.pwd_user_id = :user_id
+                ORDER BY a.applied_at DESC, a.id DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getApplicantsByCompanyUser(int $companyUserId): array {
