@@ -220,15 +220,16 @@ switch ($action) {
         $applyController->toCheckApplicationStatus();
         break;
 
-    case 'fetch_applicants':
+    case 'fetch_user_applications':
         require_once 'model/applyModel.php';
         require_once 'controllers/applyController.php';
 
         $applyModel = new ApplyModel($conn);
         $applyController = new ApplyController($applyModel);
-        $applyController->toFetchApplicants();
+        $applyController->toFetchUserApplications();
         break;
 
+    case 'delete_application':
     case 'cancel_application':
         require_once 'model/applyModel.php';
         require_once 'controllers/applyController.php';

@@ -150,15 +150,20 @@ class ApplyModel {
                     j.salary,
                     c.company_name
                 FROM applications a
-                INNER JOIN job_listings j ON j.id = a.job_id
-                INNER JOIN companies c ON c.id = j.company_id
-                WHERE a.pwd_user_id = :user_id
+                INNER JOIN users u
+                    ON u.id = a.pwd_user_id
+                INNER JOIN job_listings j
+                    ON j.id = a.job_id
+                INNER JOIN companies c
+                    ON c.id = j.company_id
+                WHERE u.id = :user_id
                 ORDER BY a.applied_at DESC, a.id DESC";
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['user_id' => $userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(['user_id' => $userId]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
 
     public function getApplicantsByCompanyUser(int $companyUserId): array {
         $stmt = $this->pdo->prepare(
