@@ -302,7 +302,7 @@ class ApplicantScreeningController {
         $ch = curl_init();
 
         curl_setopt_array($ch, [
-            CURLOPT_URL => 'https://app.philsms.com/api/v3/sms/send',
+            CURLOPT_URL => 'https://dashboard.philsms.com/api/v3/sms/send',
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_RETURNTRANSFER => true,
