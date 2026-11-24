@@ -7,13 +7,21 @@ class CompanyProfileModel {
     }
 
     public function fetchCompanyProfile(string $userId): ?array {
+
         $stmt = $this->pdo->prepare(
-            "SELECT c.company_name, c.phone, c.description
-             FROM users u
-             INNER JOIN companies c ON c.user_id = u.id
-             WHERE u.id = :user_id"
+            "SELECT
+                c.company_name,
+                u.email,
+                c.phone,
+                c.description
+            FROM users u
+            INNER JOIN companies c ON c.user_id = u.id
+            WHERE u.id = :user_id"
         );
-        $stmt->execute(['user_id' => $userId]);
+
+        $stmt->execute([
+            'user_id' => $userId
+        ]);
 
         $company = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -22,12 +30,16 @@ class CompanyProfileModel {
         }
 
         $defaults = [
+            'email' => 'Insert email address',
             'phone' => 'Insert phone number',
             'description' => 'Insert company description'
         ];
 
         foreach ($defaults as $field => $default) {
-            if (!isset($company[$field]) || trim((string) $company[$field]) === '') {
+
+            if (!isset($company[$field]) ||
+                trim((string) $company[$field]) === '') {
+
                 $company[$field] = $default;
             }
         }
