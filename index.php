@@ -276,6 +276,42 @@ switch ($action) {
         $applicantScreeningController->updateApplicationStatus();
         break;
 
+    case 'fetch_tts_phrases':
+        require_once 'model/ttsModel.php';
+        require_once 'controllers/ttsController.php';
+
+        $ttsModel = new TtsModel($conn);
+        $ttsController = new TtsController($ttsModel);
+        $ttsController->toFetchPhrases();
+        break;
+
+    case 'add_tts_phrase':
+        require_once 'model/ttsModel.php';
+        require_once 'controllers/ttsController.php';
+
+        $ttsModel = new TtsModel($conn);
+        $ttsController = new TtsController($ttsModel);
+        $ttsController->toAddPhrase();
+        break;
+
+    case 'update_tts_phrase':
+        require_once 'model/ttsModel.php';
+        require_once 'controllers/ttsController.php';
+
+        $ttsModel = new TtsModel($conn);
+        $ttsController = new TtsController($ttsModel);
+        $ttsController->toUpdatePhrase();
+        break;
+
+    case 'delete_tts_phrase':
+        require_once 'model/ttsModel.php';
+        require_once 'controllers/ttsController.php';
+
+        $ttsModel = new TtsModel($conn);
+        $ttsController = new TtsController($ttsModel);
+        $ttsController->toDeletePhrase();
+        break;
+
     default:
         // Endpoint not found
         http_response_code(404);

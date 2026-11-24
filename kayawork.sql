@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 22, 2026 at 02:34 PM
--- Server version: 10.11.16-MariaDB
--- PHP Version: 8.3.36
+-- Generation Time: Nov 24, 2026 at 04:45 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -196,11 +196,18 @@ INSERT INTO `resumes` (`id`, `pwd_user_id`, `title`, `skills`, `experience`, `ed
 CREATE TABLE `tts_phrases` (
   `id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL,
-  `category` enum('greeting','experience','clarification','accommodations','closing','custom') NOT NULL DEFAULT 'custom',
+  `category` enum('greeting','experience','clarification','accommodations','closing','custom','About Me','Casual','Yes/No','Quick Sentences','Convenience','Question Response') NOT NULL DEFAULT 'custom',
   `label` varchar(100) NOT NULL,
   `phrase_text` text NOT NULL,
   `sort_order` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tts_phrases`
+--
+
+INSERT INTO `tts_phrases` (`id`, `user_id`, `category`, `label`, `phrase_text`, `sort_order`) VALUES
+(1, 37, 'Casual', 'Hello Everyone', 'Hello Everyone', 1);
 
 -- --------------------------------------------------------
 
@@ -347,7 +354,7 @@ ALTER TABLE `resumes`
 -- AUTO_INCREMENT for table `tts_phrases`
 --
 ALTER TABLE `tts_phrases`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
