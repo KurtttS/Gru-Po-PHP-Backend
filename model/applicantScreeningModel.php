@@ -163,4 +163,44 @@ class ApplicantScreeningModel {
         return $stmt->rowCount() > 0;
     }
 
+        
+    public function getApplicantPhone(int $applicationId, int $userId): ?string {
+
+        $sql = "SELECT pu.phone
+                FROM applications a
+
+                INNER JOIN job_listings j
+                    ON j.id = a.job_id
+
+                INNER JOIN companies c
+                    ON c.id = j.company_id
+
+                INNER JOIN users u
+                    ON u.id = a.pwd_user_id
+
+                INNER JOIN pwd_users pu
+                    ON pu.user_id = u.id
+
+                WHERE a.id = :application_id
+                AND c.user_id = :user_id
+
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->execute([
+            ':application_id' => $applicationId,
+            ':user_id' => $userId
+        ]);
+
+        $phone = $stmt->fetchColumn();
+
+        if ($phone === false || $phone === null || trim((string)$phone) === '') {
+            return null;
+        }
+
+        return trim((string)$phone);
+    }
+
+
 }
